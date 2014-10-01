@@ -1,0 +1,34 @@
+div.settingsbox-export_provisioning div.boxcontent {
+	padding: 15px;	
+}
+
+
+table.export_provisioning {
+	margin: 0;
+}
+
+
+table.export_provisioning td {
+	padding: 2px 0 6px 0;
+	vertical-align: top;
+}
+
+
+table.export_provisioning td.header {
+	font-weight: bold;
+	padding-top: 15px;
+	
+}
+
+table.export_provisioning td.headerfirst {
+	font-weight: bold;
+	
+}
+
+table.export_provisioning td.title {
+	padding-right: 20px;
+	white-space: nowrap;
+	
+}
+
+
