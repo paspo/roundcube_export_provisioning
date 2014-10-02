@@ -14,6 +14,12 @@
 
 include "File_Format_Iaf.php";
 
+define('EXPORT_PROVISIONING_SMTPAUTH_NONE',0);
+define('EXPORT_PROVISIONING_SMTPAUTH_PLAIN',1);
+
+
+
+
 class export_provisioning extends rcube_plugin
 {
 	public $task = 'settings';
@@ -123,6 +129,21 @@ class export_provisioning extends rcube_plugin
 		$this->data['OutgoingMailServerUseSSL'] = $ssl;
 		$this->data['OutgoingMailServerUsername'] = $smtp_user;
 		$this->data['OutgoingPassword'] = $smtp_pass;
+		
+		$this->data['OutgoingMailServerAuthentication'] = EXPORT_PROVISIONING_SMTPAUTH_NONE;
+
+		 if (is_null($args['smtp_auth_type']) || trim($args['smtp_auth_type'])=='') {
+		 	$user = $this->rcmail->config->get('smtp_user');
+		 	if (is_string($user) && strlen(trim($user))>0) {
+		 		$this->data['OutgoingMailServerAuthentication'] = EXPORT_PROVISIONING_SMTPAUTH_PLAIN;
+		 	}
+		 } else {
+		 	switch (strtoupper($args['smtp_auth_type'])) {
+        		case 'PLAIN':
+        			$this->data['OutgoingMailServerAuthentication'] = EXPORT_PROVISIONING_SMTPAUTH_PLAIN;
+            	break;                
+    		}  
+		 }
 	}
 		
 		
@@ -158,14 +179,15 @@ class export_provisioning extends rcube_plugin
 		$content->addChild('string',$this->data['IncomingMailServerUsername']);
 		$content->addChild('key','IncomingPassword');
 		$content->addChild('string',$this->data['IncomingPassword']);
-		/*
-					<key>OutgoingMailServerAuthentication</key>
-			<string>EmailAuthNone</string>
-			*/
-		
 		$content->addChild('key','OutgoingMailServerAuthentication');
-		$content->addChild('string','EmailAuthPassword');
-		
+		switch($this->data['OutgoingMailServerAuthentication']) {
+        	case EXPORT_PROVISIONING_SMTPAUTH_PLAIN:
+				$content->addChild('string','EmailAuthPassword');
+            break;           
+        	case EXPORT_PROVISIONING_SMTPAUTH_NONE:
+				$content->addChild('string','EmailAuthNone');
+            break;           
+    	}  
 		$content->addChild('key','OutgoingMailServerHostName');
 		$content->addChild('string',$this->data['OutgoingMailServerHostName']);
 		$content->addChild('key','OutgoingMailServerPortNumber');
@@ -254,13 +276,14 @@ class export_provisioning extends rcube_plugin
 		$iaf->__set('SMTPServer',$this->data['OutgoingMailServerHostName']);
 		$iaf->__set('SMTPPort',$this->data['OutgoingMailServerPortNumber']);
 		$iaf->__set('SMTPSecureConnection',$this->data['OutgoingMailServerUseSSL'] ? '1' : '0');
-/*
-	IAF_AM_NONE		=> 0,
-	IAF_AM_SPA		=> 1,
-	IAF_AM_USE_INCOMING	=> 2,
-	IAF_AM_PLAIN		=> 3,
-*/
-		$iaf->__set('SMTPAuthMethod',3);
+		switch ($this->data['OutgoingMailServerAuthentication']) {
+        	case EXPORT_PROVISIONING_SMTPAUTH_PLAIN:
+				$iaf->__set('SMTPAuthMethod',3);
+            break;           
+        	case EXPORT_PROVISIONING_SMTPAUTH_NONE:
+				$iaf->__set('SMTPAuthMethod',0);
+            break;           
+    	}  
 		if ($this->data['organization'] != '') {
 	        $iaf->__set('SMTPOrganizationName',$this->data['organization']);
 		}
