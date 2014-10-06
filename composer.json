@@ -1,0 +1,25 @@
+{
+    "name": "paspo/export_provisioning",
+    "type": "roundcube-plugin",
+    "description": "Lets you export a configuration file for iOS/OSX/WLM",
+    "homepage": "https://github.com/paspo/roundcube_export_provisioning",
+    "license": "GPL-2.0",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Paolo Asperti",
+            "email": "paspo@users.noreply.github.com",
+            "role": "Developer"
+        },
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://plugins.roundcube.net"
+        }
+    ],
+    "require": {
+        "roundcube/plugin-installer": ">=0.1.3"
+    }
+}
+
