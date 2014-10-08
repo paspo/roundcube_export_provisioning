@@ -45,57 +45,89 @@ class export_provisioning extends rcube_plugin
 		$this->rcmail->output->set_pagetitle($this->gettext('pagetitle'));
 	    $this->rcmail->output->send('plugin');
 	}
-  
+
 	public function page()
 	{
 		global $table;
 
 		$table = new html_table(array('cols' => 2, 'cellpadding' => 0, 'cellspacing' => 0, 'class' => 'export_provisioning'));
 
+		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('identity'));
+		$table->add_row();
+
+		$user = $this->rcmail->user;
+		$identities = $user->list_identities();
+
+		$select = new html_select(array('name' => '_identity', 'id' => '_identity', 'onchange' => 'export_provisioning_changelink(this)'));
+		$default_identity = false;
+		if (is_array($identities) && count($identities)>0) {
+			foreach ($identities as $identity) {
+				if (!$default_identity && $identity['standard']==1) {
+					$default_identity = $identity['identity_id'];
+				}
+				$display_name = trim($identity['name'] . ' <'.$identity['email'].'>');
+				$select->add($display_name, $identity['identity_id']);
+			}
+		}
+		$table->add('title', Q($this->gettext('identity_label')));
+		$table->add('value', $select->show($default_identity));
+		$table->add_row();
+
 		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('apple'));
 		$table->add_row();
-	
+
 		$table->add('title', Q($this->gettext('download_ios')));
-		$table->add('value', "<a href='./?_task=settings&_action=plugin.export_provisioning-download-ios'>".$this->gettext('download')."</a>");
+		$table->add('value', "<a id='export_provisioning_download_ios' href='./?_task=settings&_action=plugin.export_provisioning-download-ios&_identity=".$default_identity."'>".$this->gettext('download')."</a>");
 		$table->add_row();
 
 		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('microsoft'));
 		$table->add_row();
 
 		$table->add('title', Q($this->gettext('download_iaf')));
-		$table->add('value', "<a href='./?_task=settings&_action=plugin.export_provisioning-download-iaf'>".$this->gettext('download')."</a>");
+		$table->add('value', "<a id='export_provisioning_download_iaf' href='./?_task=settings&_action=plugin.export_provisioning-download-iaf&_identity=".$default_identity."'>".$this->gettext('download')."</a>");
 		$table->add_row();
-		
-		$out = html::div(array('class' => 'settingsbox settingsbox-export_provisioning'), 
-		html::div(array('class' => 'boxtitle'), $this->gettext('boxtitle')) . 
+
+		$out = html::div(array('class' => 'settingsbox settingsbox-export_provisioning'),
+		html::div(array('class' => 'boxtitle'), $this->gettext('boxtitle')) .
 		html::div(array('class' => 'boxcontent'), $table->show()));
 
-		return $out;		
+		return $out;
 	}
-		
+
 	public function get_config_values()
 	{
 		$user = $this->rcmail->user;
 		$identities = $user->list_identities();
 		if (is_array($identities) && count($identities)>0) {
-			$identity = $identities[0];  // TODO: let the user choose from the config
+			$identity = $identities[0];  // default: first identity
+			if ($req_identity = $_GET['_identity']) {
+				foreach ($identities as $i) {
+					if ($i['identity_id']==$req_identity) {
+						$identity = $i;
+					}
+				}
+			}
 			$this->data['email'] = $identity['email'];
 			$this->data['organization'] = $identity['organization'];
 			$this->data['name'] = $identity['name'];
 		}
-		
+
+		if (trim($this->data['name'])=='') {
+			$this->data['name'] = $identity['email'];
+		}
+
 		if (!is_object($this->rcmail->smtp)) {
             $this->rcmail->smtp_init(true);
         }
         $smtp = $this->rcmail->smtp;
-        
+
         // bisogna triggerare lo storage per recuperare i dati di login
 		if (!is_object($this->rcmail->storage)) {
             $this->rcmail->storage_init(true);
         }
 		$storage = $this->rcmail->storage;
 	}
-		
+
 	public function storage_init_hook($args)
 	{
 		$this->data['IncomingMailServerHostName'] = $args['host'];
@@ -104,7 +136,7 @@ class export_provisioning extends rcube_plugin
 	    $this->data['IncomingMailServerUsername'] = $args['user'];
 	    $this->data['IncomingPassword'] = $args['password'];
 	}
-		
+
 	public function smtp_connect_hook($args)
 	{
 		$host = $args['smtp_server'];
@@ -115,7 +147,7 @@ class export_provisioning extends rcube_plugin
 		$smtp_pass = $this->rcmail->config->get('smtp_pass');
         $smtp_pass = str_replace('%p', $this->rcmail->get_user_password(), $smtp_pass);
 		$ssl = false;
-		
+
 		if (strlen($host)>6) {
 			$prefix = substr($host,0,6);
 			if (($prefix == 'tls://') || ($prefix == 'ssl://') ){
@@ -123,13 +155,13 @@ class export_provisioning extends rcube_plugin
 				$ssl = true;
 			}
 		}
-		
+
 		$this->data['OutgoingMailServerHostName'] = $host;
 		$this->data['OutgoingMailServerPortNumber'] = $args['smtp_port'];
 		$this->data['OutgoingMailServerUseSSL'] = $ssl;
 		$this->data['OutgoingMailServerUsername'] = $smtp_user;
 		$this->data['OutgoingPassword'] = $smtp_pass;
-		
+
 		$this->data['OutgoingMailServerAuthentication'] = EXPORT_PROVISIONING_SMTPAUTH_NONE;
 
 		 if (is_null($args['smtp_auth_type']) || trim($args['smtp_auth_type'])=='') {
@@ -141,12 +173,12 @@ class export_provisioning extends rcube_plugin
 		 	switch (strtoupper($args['smtp_auth_type'])) {
         		case 'PLAIN':
         			$this->data['OutgoingMailServerAuthentication'] = EXPORT_PROVISIONING_SMTPAUTH_PLAIN;
-            	break;                
-    		}  
+            	break;
+    		}
 		 }
 	}
-		
-		
+
+
 	public function ios()
 	{
 		$this->get_config_values();
@@ -155,9 +187,9 @@ class export_provisioning extends rcube_plugin
 <plist version="1.0">
 </plist>';
 		$xml = new SimpleXMLElement($text);
-		$dict = $xml->addChild('dict');		
+		$dict = $xml->addChild('dict');
 		$dict->addChild('key','PayloadContent');
-		$dict->addChild('array');	
+		$dict->addChild('array');
 		$content = $dict->array->addChild('dict');
 		$content->addChild('key','EmailAccountDescription');
 		$content->addChild('string',$this->data['email']);
@@ -183,11 +215,11 @@ class export_provisioning extends rcube_plugin
 		switch($this->data['OutgoingMailServerAuthentication']) {
         	case EXPORT_PROVISIONING_SMTPAUTH_PLAIN:
 				$content->addChild('string','EmailAuthPassword');
-            break;           
+            break;
         	case EXPORT_PROVISIONING_SMTPAUTH_NONE:
 				$content->addChild('string','EmailAuthNone');
-            break;           
-    	}  
+            break;
+    	}
 		$content->addChild('key','OutgoingMailServerHostName');
 		$content->addChild('string',$this->data['OutgoingMailServerHostName']);
 		$content->addChild('key','OutgoingMailServerPortNumber');
@@ -211,13 +243,13 @@ class export_provisioning extends rcube_plugin
 		$content->addChild('key','PayloadUUID');
 		$content->addChild('string',$this->_randomUUID());
 		$content->addChild('key','PayloadVersion');
-		$content->addChild('integer','1');	
+		$content->addChild('integer','1');
 		$content->addChild('key','PreventAppSheet');
-		$content->addChild('false');	
+		$content->addChild('false');
 		$content->addChild('key','PreventMove');
-		$content->addChild('false');	
+		$content->addChild('false');
 		$content->addChild('key','SMIMEEnabled');
-		$content->addChild('false');			
+		$content->addChild('false');
 		$dict->addChild('key','PayloadDescription');
 		$dict->addChild('string',$this->gettext('PayloadDescription').': '.$this->data['email']);
 		$dict->addChild('key','PayloadDisplayName');
@@ -227,21 +259,21 @@ class export_provisioning extends rcube_plugin
 		$dict->addChild('key','PayloadOrganization');
 		$dict->addChild('string',$this->data['organization']);
 		$dict->addChild('key','PayloadRemovalDisallowed');
-		$dict->addChild('false');		
+		$dict->addChild('false');
 		$dict->addChild('key','PayloadType');
 		$dict->addChild('string','Configuration');
 		$dict->addChild('key','PayloadUUID');
-		$dict->addChild('string',$this->_randomUUID());		
+		$dict->addChild('string',$this->_randomUUID());
 		$dict->addChild('key','PayloadVersion');
-		$dict->addChild('integer','1');		
+		$dict->addChild('integer','1');
 
 		$dom = new DOMDocument("1.0");
 		$dom->preserveWhiteSpace = false;
 		$dom->formatOutput = true;
 		$dom->loadXML($xml->asXML());
 		return $dom->saveXML();
-	}	
-	
+	}
+
 	public function download_ios()
 	{
 		$ios_data = $this->ios();
@@ -253,7 +285,7 @@ class export_provisioning extends rcube_plugin
 	    @unlink($tmpfname);
         exit;
 	}
-	
+
 	public function iaf($filename) {
 		$this->get_config_values();
 		$iaf = new File_Format_Iaf();
@@ -271,7 +303,7 @@ class export_provisioning extends rcube_plugin
 			$iaf->__set('SMTPDisplayName',$this->data['name']);
 		} else {
 			$iaf->__set('SMTPDisplayName',$this->data['email']);
-		}		
+		}
 		$iaf->__set('SMTPEmailAddress',$this->data['email']);
 		$iaf->__set('SMTPServer',$this->data['OutgoingMailServerHostName']);
 		$iaf->__set('SMTPPort',$this->data['OutgoingMailServerPortNumber']);
@@ -279,11 +311,11 @@ class export_provisioning extends rcube_plugin
 		switch ($this->data['OutgoingMailServerAuthentication']) {
         	case EXPORT_PROVISIONING_SMTPAUTH_PLAIN:
 				$iaf->__set('SMTPAuthMethod',3);
-            break;           
+            break;
         	case EXPORT_PROVISIONING_SMTPAUTH_NONE:
 				$iaf->__set('SMTPAuthMethod',0);
-            break;           
-    	}  
+            break;
+    	}
 		if ($this->data['organization'] != '') {
 	        $iaf->__set('SMTPOrganizationName',$this->data['organization']);
 		}
@@ -292,7 +324,7 @@ class export_provisioning extends rcube_plugin
 		$iaf->__set('MakeAvailableOffline','0');
 		$iaf->save($filename);
 	}
-	
+
 	public function download_iaf()
 	{
 		$temp_dir  = $this->rcmail->config->get('temp_dir');
@@ -303,7 +335,7 @@ class export_provisioning extends rcube_plugin
 	    @unlink($tmpfname);
         exit;
 	}
-	
+
 	private function _send_file($tmpfname, $filename)
     {
         $browser = new rcube_browser;
@@ -329,8 +361,8 @@ class export_provisioning extends rcube_plugin
         header("Content-length: " . filesize($tmpfname));
         readfile($tmpfname);
     }
-	
-	   
+
+
     private function _randomUUID()
     {
     	$fortychars = sha1(md5(rand()));
@@ -340,6 +372,6 @@ class export_provisioning extends rcube_plugin
 		$fortychars[23]='-';
     	return strtoupper(substr($fortychars,0,36));
     }
-        
+
 
 }

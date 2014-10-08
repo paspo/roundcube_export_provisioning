@@ -10,6 +10,8 @@ $labels['download_ios'] = 'Scarica profilo di configurazione per iOS / OSX';
 $labels['download_iaf'] = 'Scarica profilo di configurazione per Outlook / Outlook Express / Windows Live Mail';
 $labels['PayloadDescription'] = 'Impostazioni account email'; // description inside configuration profile
 $labels['download'] = 'Download';
+$labels['identity'] = 'Identità';
+$labels['identity_label'] = 'Scegli l\'identità da esportare';
 
 
 
