@@ -8,7 +8,7 @@
  *
  * @date 2014-09-30
  * @author Paolo Asperti
- * @url http://asperti.com/
+ * @url https://github.com/paspo/roundcube_export_provisioning
  * @licence GNU GPL
  */
 

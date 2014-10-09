@@ -1,3 +1,10 @@
+* version 1.1 [2014-10-09]
+-----------------------------------------------------------
+- [FIX] When exporting an IOS profile for an identity without a name,
+the generated file can be used in OSX only (which asks for the missing name).
+If the name is missing, we use the email address instead.
+- [NEW] Now you can select wich identity you want to export 
+
 
 * version 1.0 [2014-10-03]
 -----------------------------------------------------------
