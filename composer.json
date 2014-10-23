@@ -5,7 +5,7 @@
     "homepage": "https://github.com/paspo/roundcube_export_provisioning",
     "keywords": ["export","configuration","settings","ios","roundcube"],
     "license": "GPL-2.0",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "authors": [
         {
             "name": "Paolo Asperti",

@@ -223,7 +223,7 @@ class export_provisioning extends rcube_plugin
 		$content->addChild('key','OutgoingMailServerHostName');
 		$content->addChild('string',$this->data['OutgoingMailServerHostName']);
 		$content->addChild('key','OutgoingMailServerPortNumber');
-		$content->addChild('string',$this->data['OutgoingMailServerPortNumber']);
+		$content->addChild('integer',$this->data['OutgoingMailServerPortNumber']);
 		$content->addChild('key','OutgoingMailServerUseSSL');
 		$content->addChild($this->data['OutgoingMailServerUseSSL'] ? 'true' : 'false');
 		$content->addChild('key','OutgoingMailServerUsername');
@@ -236,8 +236,10 @@ class export_provisioning extends rcube_plugin
 		$content->addChild('string','IMAP Account ('.$this->data['email'].')');
 		$content->addChild('key','PayloadIdentifier');
 		$content->addChild('string','profile.'.$this->data['email'].'.e-mail');
-		$content->addChild('key','PayloadOrganization');
-		$content->addChild('string',$this->data['organization']);
+		if ($this->data['organization'] != '') {
+			$content->addChild('key','PayloadOrganization');
+			$content->addChild('string',$this->data['organization']);
+		}
 		$content->addChild('key','PayloadType');
 		$content->addChild('string','com.apple.mail.managed');
 		$content->addChild('key','PayloadUUID');
@@ -256,8 +258,10 @@ class export_provisioning extends rcube_plugin
 		$dict->addChild('string','email ' . $this->data['email']);
 		$dict->addChild('key','PayloadIdentifier');
 		$dict->addChild('string','profile.'.$this->data['email']);
-		$dict->addChild('key','PayloadOrganization');
-		$dict->addChild('string',$this->data['organization']);
+		if ($this->data['organization'] != '') {
+			$dict->addChild('key','PayloadOrganization');
+			$dict->addChild('string',$this->data['organization']);
+		}
 		$dict->addChild('key','PayloadRemovalDisallowed');
 		$dict->addChild('false');
 		$dict->addChild('key','PayloadType');
