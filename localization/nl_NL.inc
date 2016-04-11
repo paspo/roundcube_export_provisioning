@@ -1,7 +1,7 @@
 <?php
 
 $labels = array();
-$labels['export_provisioning'] = 'Configuratieprofiel exporteren';
+$labels['export_provisioning'] = 'Configuratieprofiel';
 $labels['pagetitle'] = 'Exporteer e-mail configuratieprofiel';
 $labels['boxtitle'] = 'Exporteer e-mail configuratieprofiel';
 $labels['apple'] = 'Apple';
