@@ -69,21 +69,21 @@ class export_provisioning extends rcube_plugin
 				$select->add($display_name, $identity['identity_id']);
 			}
 		}
-		$table->add('title', Q($this->gettext('identity_label')));
+		$table->add('title', rcube::Q($this->gettext('identity_label')));
 		$table->add('value', $select->show($default_identity));
 		$table->add_row();
 
 		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('apple'));
 		$table->add_row();
 
-		$table->add('title', Q($this->gettext('download_ios')));
+		$table->add('title', rcube::Q($this->gettext('download_ios')));
 		$table->add('value', "<a id='export_provisioning_download_ios' href='./?_task=settings&_action=plugin.export_provisioning-download-ios&_identity=".$default_identity."'>".$this->gettext('download')."</a>");
 		$table->add_row();
 
 		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('microsoft'));
 		$table->add_row();
 
-		$table->add('title', Q($this->gettext('download_iaf')));
+		$table->add('title', rcube::Q($this->gettext('download_iaf')));
 		$table->add('value', "<a id='export_provisioning_download_iaf' href='./?_task=settings&_action=plugin.export_provisioning-download-iaf&_identity=".$default_identity."'>".$this->gettext('download')."</a>");
 		$table->add_row();
 
