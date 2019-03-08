@@ -9,9 +9,7 @@ $labels['microsoft'] = 'Microsoft';
 $labels['download_ios'] = 'iOS / OSX konfigurációs profil';
 $labels['download_iaf'] = 'Outlook Express / Windows Live Mail konfigurációs profil';
 $labels['PayloadDescription'] = 'Email fiók beállítás'; // description inside configuration profile
-$labels['download'] = 'Letöltés';
 $labels['identity'] = 'Azonosító';
-$labels['identity_label'] = 'Válassz azonosítót';
 
 
 
