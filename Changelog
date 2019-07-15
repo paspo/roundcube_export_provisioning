@@ -1,3 +1,8 @@
+* version 1.1.5 [2019-07-15]
+-----------------------------------------------------------
+- [FIX] Fixed issue #9: On mobile phones, or small browser windows the
+Download link is not reachable.
+
 * version 1.1.4 [2017-08-18]
 -----------------------------------------------------------
 - [NEW] Added Dutch localization (nl_NL)
