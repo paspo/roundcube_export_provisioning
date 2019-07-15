@@ -52,39 +52,43 @@ class export_provisioning extends rcube_plugin
 
 		$table = new html_table(array('cols' => 2, 'cellpadding' => 0, 'cellspacing' => 0, 'class' => 'export_provisioning'));
 
-		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('identity'));
+		$table->add(array('class' => 'headerfirst'), $this->gettext('identity'));
 		$table->add_row();
 
 		$user = $this->rcmail->user;
 		$identities = $user->list_identities();
-
-		$select = new html_select(array('name' => '_identity', 'id' => '_identity', 'onchange' => 'export_provisioning_changelink(this)'));
-		$default_identity = false;
-		if (is_array($identities) && count($identities)>0) {
-			foreach ($identities as $identity) {
-				if (!$default_identity && $identity['standard']==1) {
-					$default_identity = $identity['identity_id'];
+		if (is_array($identities)) {
+			if (count($identities)>1) {
+				$select = new html_select(array('name' => '_identity', 'id' => '_identity', 'onchange' => 'export_provisioning_changelink(this)'));
+				$default_identity = false;
+				foreach ($identities as $identity) {
+					if (!$default_identity && $identity['standard']==1) {
+						$default_identity = $identity['identity_id'];
+					}
+					$display_name = trim($identity['name'] . ' ('.$identity['email'].')');
+					$select->add($display_name, $identity['identity_id']);
 				}
-				$display_name = trim($identity['name'] . ' <'.$identity['email'].'>');
-				$select->add($display_name, $identity['identity_id']);
+				$table->add('value', $select->show($default_identity));
+			} elseif (count($identities) == 1) {
+				$identity = array_shift($identities);
+				$table->add('value', trim($identity['name'] . ' ('.$identity['email'].')'));
+			} else {
+				// should never happen: Roundcube always provides an identity
+				$table->add('value', $this->gettext('no_identity_available'));
 			}
 		}
-		$table->add('title', rcube::Q($this->gettext('identity_label')));
-		$table->add('value', $select->show($default_identity));
 		$table->add_row();
 
-		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('apple'));
+		$table->add(array('class' => 'headerfirst'), $this->gettext('apple'));
 		$table->add_row();
 
-		$table->add('title', rcube::Q($this->gettext('download_ios')));
-		$table->add('value', "<a id='export_provisioning_download_ios' href='./?_task=settings&_action=plugin.export_provisioning-download-ios&_identity=".$default_identity."'>".$this->gettext('download')."</a>");
+		$table->add('value', "<a id='export_provisioning_download_ios' href='./?_task=settings&_action=plugin.export_provisioning-download-ios&_identity=".$default_identity."'>".$this->gettext('download_ios')."</a>");
 		$table->add_row();
 
-		$table->add(array('colspan' => 2, 'class' => 'headerfirst'), $this->gettext('microsoft'));
+		$table->add(array('class' => 'headerfirst'), $this->gettext('microsoft'));
 		$table->add_row();
 
-		$table->add('title', rcube::Q($this->gettext('download_iaf')));
-		$table->add('value', "<a id='export_provisioning_download_iaf' href='./?_task=settings&_action=plugin.export_provisioning-download-iaf&_identity=".$default_identity."'>".$this->gettext('download')."</a>");
+		$table->add('value', "<a id='export_provisioning_download_iaf' href='./?_task=settings&_action=plugin.export_provisioning-download-iaf&_identity=".$default_identity."'>".$this->gettext('download_iaf')."</a>");
 		$table->add_row();
 
 		$out = html::div(array('class' => 'settingsbox settingsbox-export_provisioning'),
