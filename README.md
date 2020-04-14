@@ -4,7 +4,7 @@ Provisioning Export Plugin for Roundcube
 Roundcube plugin that generates an email provisioning file.
 
 ## Installation
-You can download the plugin directly form this repository, or via the [plugin repository for Roundcube](http://plugins.roundcube.net/).
+You can download the plugin directly form this repository, or via [packagist](https://packagist.org/packages/paspo/export_provisioning).
 
 ## Usage
 You can find a new settings tab named "Provisioning". From there you only have to choose an identity (or use the default one) and click on the dowload links.
