@@ -57,10 +57,10 @@ class export_provisioning extends rcube_plugin
 
 		$user = $this->rcmail->user;
 		$identities = $user->list_identities();
+		$default_identity = false;
 		if (is_array($identities)) {
 			if (count($identities)>1) {
 				$select = new html_select(array('name' => '_identity', 'id' => '_identity', 'onchange' => 'export_provisioning_changelink(this)'));
-				$default_identity = false;
 				foreach ($identities as $identity) {
 					if (!$default_identity && $identity['standard']==1) {
 						$default_identity = $identity['identity_id'];
