@@ -340,7 +340,7 @@ class File_Format_Iaf
                                 default :
                                 
                                         echo "Unknown format: [{$field_format}]";
-                                        continue;
+                                        continue 2;
                         }
                         
                         // call callback() as 'write packed'
